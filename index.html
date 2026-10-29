@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>fincalc.de</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" data-i18n="eyebrow">German personal finance</p>
+          <h1>fincalc.de</h1>
+        </div>
+        <div class="topbar-actions">
+          <label class="language-control">
+            <span data-i18n="language">Language</span>
+            <select id="languageSwitch" aria-label="Language">
+              <option value="en">English</option>
+              <option value="de">Deutsch</option>
+            </select>
+          </label>
+          <button id="load-demo" class="secondary-button" data-i18n="loadDemo">Load demo data</button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="panel">
+          <h2 data-i18n="personalData">Personal data</h2>
+          <div class="form-grid">
+            <label>
+              <span data-i18n="name">Name</span>
+              <input id="name" type="text" value="Max Mustermann" />
+            </label>
+            <label>
+              <span data-i18n="city">City</span>
+              <input id="city" type="text" value="Berlin" />
+            </label>
+            <label>
+              <span data-i18n="taxClass">Tax class</span>
+              <select id="taxClass">
+                <option value="1">I</option>
+                <option value="2" selected>II</option>
+                <option value="3">III</option>
+              </select>
+            </label>
+            <label>
+              <span data-i18n="householdType">Household type</span>
+              <select id="householdType">
+                <option value="single" selected data-i18n="single">Single</option>
+                <option value="couple" data-i18n="couple">Couple</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 data-i18n="cashFlow">Cash flow</h2>
+          <div class="form-grid">
+            <label>
+              <span data-i18n="grossSalary">Gross salary (year)</span>
+              <input id="salary" type="number" value="72000" />
+            </label>
+            <label>
+              <span data-i18n="sideIncome">Side income (month)</span>
+              <input id="sideIncome" type="number" value="250" />
+            </label>
+            <label>
+              <span data-i18n="rentMortgage">Rent / mortgage (month)</span>
+              <input id="rent" type="number" value="1200" />
+            </label>
+            <label>
+              <span data-i18n="foodDaily">Food &amp; daily life (month)</span>
+              <input id="food" type="number" value="500" />
+            </label>
+            <label>
+              <span data-i18n="insuranceHealth">Insurance &amp; health (month)</span>
+              <input id="insurance" type="number" value="350" />
+            </label>
+            <label>
+              <span data-i18n="transportMobility">Transport &amp; mobility (month)</span>
+              <input id="transport" type="number" value="220" />
+            </label>
+            <label>
+              <span data-i18n="leisureOther">Leisure &amp; other costs (month)</span>
+              <input id="leisure" type="number" value="300" />
+            </label>
+            <label>
+              <span data-i18n="monthlyInvestment">Monthly investment contribution</span>
+              <input id="investment" type="number" value="600" />
+            </label>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 data-i18n="retirementWealth">Retirement &amp; wealth</h2>
+          <div class="form-grid">
+            <label>
+              <span data-i18n="currentSavings">Current savings</span>
+              <input id="currentSavings" type="number" value="25000" />
+            </label>
+            <label>
+              <span data-i18n="expectedReturn">Expected annual return (%)</span>
+              <input id="annualReturn" type="number" step="0.1" value="6" />
+            </label>
+            <label>
+              <span data-i18n="horizon">Investment horizon (years)</span>
+              <input id="years" type="number" value="20" />
+            </label>
+            <label>
+              <span data-i18n="inflation">Expected inflation (% / year)</span>
+              <input id="inflationRate" type="number" step="0.1" value="2" />
+            </label>
+            <label>
+              <span data-i18n="pensionContribution">Pension contribution (month)</span>
+              <input id="pensionContribution" type="number" value="200" />
+            </label>
+          </div>
+        </section>
+
+        <section class="panel assets-panel">
+          <h2 data-i18n="assets">Assets</h2>
+          <form id="assetForm" class="asset-form">
+            <div class="form-grid">
+              <label>
+                <span data-i18n="assetType">Asset type</span>
+                <select id="assetType" name="assetType">
+                  <option value="house" data-i18n="typeHouse">House</option>
+                  <option value="etf">ETF</option>
+                  <option value="stock" data-i18n="typeStock">Stock</option>
+                  <option value="pension" data-i18n="typePension">Pension</option>
+                  <option value="loan" data-i18n="typeLoan">Loan</option>
+                  <option value="cash" data-i18n="typeCash">Cash</option>
+                  <option value="business" data-i18n="typeBusiness">Business</option>
+                  <option value="income" data-i18n="typeIncome">Income</option>
+                </select>
+              </label>
+              <label>
+                <span data-i18n="name">Name</span>
+                <input id="assetName" name="assetName" type="text" value="Rental property" />
+              </label>
+              <label>
+                <span data-i18n="currentValue">Current value</span>
+                <input id="assetValue" name="assetValue" type="number" value="250000" />
+              </label>
+              <label>
+                <span data-i18n="annualRate">Annual return (%)</span>
+                <input id="assetRate" name="assetRate" type="number" step="0.1" value="3.5" />
+              </label>
+              <label>
+                <span id="assetContributionLabel" data-i18n="monthlyContribution">Monthly contribution</span>
+                <input id="assetContribution" name="assetContribution" type="number" value="300" />
+              </label>
+              <label>
+                <span data-i18n="acquisitionYear">Acquisition year</span>
+                <input id="assetYear" name="assetYear" type="number" value="2023" />
+              </label>
+            </div>
+            <div class="button-row">
+              <button type="submit" data-i18n="addAsset">Add asset</button>
+            </div>
+          </form>
+
+          <div class="asset-toolbar">
+            <label class="view-control">
+              <span data-i18n="assetView">Asset display</span>
+              <select id="assetView">
+                <option value="cards" data-i18n="cardView">Cards</option>
+                <option value="list" data-i18n="listView">Compact list</option>
+              </select>
+            </label>
+          </div>
+          <div id="assetsList" class="asset-list"></div>
+          <details class="projection-details">
+            <summary data-i18n="projectionTitle">Asset &amp; cash flow projection</summary>
+            <p class="projection-note" data-i18n="projectionNote">Compare annual income, costs, investments, and each asset side by side. Future cash flows are assumed to grow with inflation; “Today's €” shows purchasing power in today's euros.</p>
+            <label class="interval-control">
+              <span data-i18n="showValues">Show values</span>
+              <select id="projectionInterval">
+                <option value="1" data-i18n="everyYear">Every year</option>
+                <option value="10" data-i18n="everyTenYears">Every 10 years</option>
+              </select>
+            </label>
+            <label class="interval-control">
+              <span data-i18n="valueBasis">Display values as</span>
+              <select id="projectionValueMode">
+                <option value="nominal" data-i18n="nominalOption">Nominal values</option>
+                <option value="today" data-i18n="todayOption">Today's value</option>
+                <option value="both" data-i18n="bothOption">Nominal + real</option>
+              </select>
+            </label>
+            <details id="cashFlowBreakdown" class="cashflow-breakdown">
+              <summary>Cash flow details (net only)</summary>
+              <p data-i18n="cashFlowDetailsHelp">Expand to include income, expenses, and investments in the projection table.</p>
+            </details>
+            <div id="assetProjection" class="projection-table-wrap"></div>
+          </details>
+        </section>
+
+        <section class="panel">
+          <h2 data-i18n="summary">Summary</h2>
+          <div class="stats-grid">
+            <div class="stat-card accent">
+              <span data-i18n="monthlyNetFlow">Monthly net cash flow</span>
+              <strong id="monthlyNet">€0</strong>
+            </div>
+            <div class="stat-card">
+              <span data-i18n="annualTax">Annual tax estimate</span>
+              <strong id="annualTax">€0</strong>
+            </div>
+            <div class="stat-card">
+              <span data-i18n="annualSavings">Annual savings capacity</span>
+              <strong id="annualSavings">€0</strong>
+            </div>
+            <div class="stat-card">
+              <span data-i18n="retirementPortfolio">Portfolio at retirement</span>
+              <strong id="portfolioValue">€0</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 data-i18n="yamlExport">YAML export</h2>
+          <textarea id="yamlOutput" rows="18" spellcheck="false"></textarea>
+          <div class="button-row">
+            <button id="exportYaml" data-i18n="exportYaml">Export YAML</button>
+            <button id="importYaml" class="secondary-button" data-i18n="importYaml">Import YAML</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
