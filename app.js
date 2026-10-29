@@ -43,7 +43,10 @@ const defaultAssets = [
 const state = {
   name: "Max Mustermann",
   city: "Berlin",
+  birthDate: "1990-01-15",
   taxClass: "2",
+  childAllowance: 0,
+  church: "none",
   householdType: "single",
   salary: 72000,
   sideIncome: 250,
@@ -64,7 +67,10 @@ const state = {
 const idMap = {
   name: "name",
   city: "city",
+  birthDate: "birthDate",
   taxClass: "taxClass",
+  childAllowance: "childAllowance",
+  church: "church",
   householdType: "householdType",
   salary: "salary",
   sideIncome: "sideIncome",
@@ -81,17 +87,51 @@ const idMap = {
   pensionContribution: "pensionContribution",
 };
 
-const numericFields = Object.keys(idMap).filter((key) => !["name", "city", "taxClass", "householdType"].includes(key));
+const numericFields = Object.keys(idMap).filter((key) => !["name", "city", "birthDate", "taxClass", "church", "householdType"].includes(key));
+
+const retirementAge = 67;
+const wealthProducts = {
+  general: { nameKey: "wealthGeneral", treatmentKey: "wealthTreatmentGeneral", retirement: false },
+  "av-depot": { nameKey: "wealthAvDepot", treatmentKey: "wealthTreatmentAvDepot", retirement: true },
+  riester: { nameKey: "wealthRiester", treatmentKey: "wealthTreatmentRiester", retirement: true },
+  "etf-portfolio": { nameKey: "wealthEtfPortfolio", treatmentKey: "wealthTreatmentEtf", retirement: false },
+  ruerup: { nameKey: "wealthRuerup", treatmentKey: "wealthTreatmentRuerup", retirement: true },
+};
 
 const translations = {
   en: {
+    load: "Load",
+    save: "Save",
+    shareYaml: "Share YAML",
+    showYaml: "Show",
+    close: "Close",
+    yamlLoaded: "YAML loaded.",
+    yamlSaved: "YAML download started.",
+    yamlCopied: "YAML copied to clipboard.",
+    clipboardUnavailable: "Clipboard access requires a supported browser and a secure connection (HTTPS or localhost).",
+    yamlFailure: "Could not complete the YAML action: ",
     eyebrow: "German personal finance",
+    domain: "Domain",
     language: "Language",
     loadDemo: "Load demo data",
     personalData: "Personal data",
+    assetTaxNotes: "Tax treatment",
+    assetAllowanceNotes: "Allowance notes",
+    assetSubsidyNotes: "Subsidy notes",
+    assetTaxNotesHelp: "Information only, not calculated. Shared allowances must not be counted separately for each asset.",
     name: "Name",
     city: "City",
+    birthDate: "Date of birth",
+    ageUnknown: "Enter your date of birth to calculate your age.",
+    ageDisplay: "Current age: {age}",
     taxClass: "Tax class",
+    childAllowance: "Child allowance factor",
+    church: "Church membership",
+    churchNone: "None",
+    churchCatholic: "Roman Catholic",
+    churchProtestant: "Protestant",
+    churchOther: "Other religious community",
+    taxProfileNote: "Child allowance and church membership are saved only; they do not affect the tax estimate.",
     householdType: "Household type",
     single: "Single",
     couple: "Couple",
@@ -110,6 +150,22 @@ const translations = {
     horizon: "Investment horizon (years)",
     inflation: "Expected inflation (% / year)",
     pensionContribution: "Pension contribution (month)",
+    wealthProduct: "Wealth product",
+    wealthTaxTreatment: "Support and tax treatment",
+    wealthNoTaxCalculation: "These are general planning classifications only; eligibility and tax savings are not calculated.",
+    wealthGeneral: "General wealth",
+    wealthAvDepot: "AV-Depot",
+    wealthRiester: "Riester",
+    wealthEtfPortfolio: "ETF-Portfolio",
+    wealthRuerup: "Rürup",
+    typeWealth: "Wealth",
+    wealthReturnNote: "Illustrative default return: 4% per year. This is an editable assumption, not a forecast or guarantee.",
+    wealthTreatmentGeneral: "No product-specific subsidy is assumed. Tax treatment depends on the underlying asset and applicable rules.",
+    wealthTreatmentAvDepot: "Potential support or tax-deferral features depend on the product and applicable rules; they are not calculated here.",
+    wealthTreatmentRiester: "Allowances and/or tax deductions may apply subject to eligibility and applicable rules; retirement benefits are taxed.",
+    wealthTreatmentEtf: "No dedicated state subsidy is assumed. Investment income and disposals may be taxable under applicable rules.",
+    wealthTreatmentRuerup: "Eligible contributions may receive tax relief subject to applicable rules; retirement payouts are taxed.",
+    wealthHorizonNote: "Planning horizon set to the years remaining until age 67; you can edit it in Retirement & wealth.",
     assets: "Assets",
     assetType: "Asset type",
     typeHouse: "House",
@@ -198,13 +254,38 @@ const translations = {
     loanRateReview: "Interest rate review",
   },
   de: {
+    load: "Laden",
+    save: "Speichern",
+    shareYaml: "YAML teilen",
+    showYaml: "Anzeigen",
+    close: "Schließen",
+    yamlLoaded: "YAML geladen.",
+    yamlSaved: "YAML-Download gestartet.",
+    yamlCopied: "YAML in die Zwischenablage kopiert.",
+    clipboardUnavailable: "Die Zwischenablage benötigt einen unterstützten Browser und eine sichere Verbindung (HTTPS oder localhost).",
+    yamlFailure: "YAML-Aktion fehlgeschlagen: ",
     eyebrow: "Private Finanzen in Deutschland",
+    domain: "Domain",
     language: "Sprache",
     loadDemo: "Beispieldaten laden",
     personalData: "Persönliche Daten",
+    assetTaxNotes: "Besteuerung",
+    assetAllowanceNotes: "Freibeträge (Notizen)",
+    assetSubsidyNotes: "Förderung (Notizen)",
+    assetTaxNotesHelp: "Nur Informationen, keine Berechnung. Gemeinsame Freibeträge dürfen nicht je Vermögenswert erneut gezählt werden.",
     name: "Name",
     city: "Stadt",
+    birthDate: "Geburtsdatum",
+    ageUnknown: "Gib dein Geburtsdatum ein, um dein Alter zu berechnen.",
+    ageDisplay: "Aktuelles Alter: {age}",
     taxClass: "Steuerklasse",
+    childAllowance: "Kinderfreibetrag (Zähler)",
+    church: "Kirchenzugehörigkeit",
+    churchNone: "Keine",
+    churchCatholic: "Römisch-katholisch",
+    churchProtestant: "Evangelisch",
+    churchOther: "Andere Religionsgemeinschaft",
+    taxProfileNote: "Kinderfreibetrag und Kirchenzugehörigkeit werden nur gespeichert; sie beeinflussen die Steuerschätzung nicht.",
     householdType: "Haushaltstyp",
     single: "Alleinstehend",
     couple: "Paar",
@@ -223,6 +304,22 @@ const translations = {
     horizon: "Anlagezeitraum (Jahre)",
     inflation: "Erwartete Inflation (% / Jahr)",
     pensionContribution: "Renteneinzahlung (Monat)",
+    wealthProduct: "Vermögensmodell",
+    wealthTaxTreatment: "Förderung und Besteuerung",
+    wealthNoTaxCalculation: "Dies sind allgemeine Planungshinweise; Berechtigung und Steuerersparnis werden nicht berechnet.",
+    wealthGeneral: "Allgemeines Vermögen",
+    wealthAvDepot: "AV-Depot",
+    wealthRiester: "Riester",
+    wealthEtfPortfolio: "ETF-Portfolio",
+    wealthRuerup: "Rürup",
+    typeWealth: "Vermögen",
+    wealthReturnNote: "Illustrative Standardrendite: 4 % pro Jahr. Dies ist eine bearbeitbare Annahme, keine Prognose oder Garantie.",
+    wealthTreatmentGeneral: "Es wird keine produktspezifische Förderung angenommen. Die Besteuerung hängt vom zugrunde liegenden Vermögenswert und den geltenden Regeln ab.",
+    wealthTreatmentAvDepot: "Mögliche Förderung oder Steuerstundung hängt vom Produkt und den geltenden Regeln ab; sie wird hier nicht berechnet.",
+    wealthTreatmentRiester: "Zulagen und/oder steuerliche Abzüge können abhängig von Berechtigung und geltenden Regeln gelten; Leistungen im Alter werden besteuert.",
+    wealthTreatmentEtf: "Es wird keine besondere staatliche Förderung angenommen. Kapitalerträge und Veräußerungen können nach den geltenden Regeln steuerpflichtig sein.",
+    wealthTreatmentRuerup: "Berechtigte Beiträge können nach den geltenden Regeln steuerlich begünstigt sein; Auszahlungen im Alter werden besteuert.",
+    wealthHorizonNote: "Der Planungshorizont wurde auf die verbleibenden Jahre bis zum Alter 67 gesetzt. Du kannst ihn unter „Ruhestand & Vermögen“ ändern.",
     assets: "Vermögenswerte",
     assetType: "Vermögensart",
     typeHouse: "Immobilie",
@@ -319,6 +416,84 @@ function t(key) {
   return translations[currentLanguage][key] || translations.en[key] || key;
 }
 
+function getCurrentAge(birthDate) {
+  if (!birthDate) return null;
+  const [year, month, day] = birthDate.split("-").map(Number);
+  const birth = new Date(Date.UTC(year, month - 1, day));
+  if (
+    !Number.isFinite(birth.getTime()) ||
+    birth.getUTCFullYear() !== year ||
+    birth.getUTCMonth() !== month - 1 ||
+    birth.getUTCDate() !== day
+  ) {
+    return null;
+  }
+
+  const today = new Date();
+  let age = today.getFullYear() - year;
+  if (
+    today.getMonth() + 1 < month ||
+    (today.getMonth() + 1 === month && today.getDate() < day)
+  ) {
+    age -= 1;
+  }
+  return age >= 0 ? age : null;
+}
+
+function updateAgeDisplay() {
+  const age = getCurrentAge(document.getElementById("birthDate").value);
+  document.getElementById("ageDisplay").textContent = age === null
+    ? t("ageUnknown")
+    : t("ageDisplay").replace("{age}", String(age));
+}
+
+function setRetirementHorizon() {
+  const age = getCurrentAge(document.getElementById("birthDate").value);
+  if (age === null) return false;
+  document.getElementById("years").value = String(Math.max(1, retirementAge - age));
+  return true;
+}
+
+function updateWealthProductUI() {
+  const isWealth = document.getElementById("assetType").value === "wealth";
+  const control = document.getElementById("wealthProductControl");
+  const note = document.getElementById("wealthProductNote");
+  control.hidden = !isWealth;
+  note.hidden = !isWealth;
+  if (!isWealth) return;
+
+  const product = wealthProducts[document.getElementById("wealthProduct").value];
+  if (!product) return;
+  const notes = [t("wealthNoTaxCalculation"), t(product.treatmentKey), t("wealthReturnNote")];
+  if (product.retirement && getCurrentAge(document.getElementById("birthDate").value) !== null) {
+    notes.push(t("wealthHorizonNote"));
+  }
+  note.textContent = notes.join(" ");
+}
+
+function applyWealthProductPreset(resetBase = false) {
+  const subtype = document.getElementById("wealthProduct").value;
+  const product = wealthProducts[subtype];
+  if (!product) return;
+
+  const nameInput = document.getElementById("assetName");
+  const defaultNames = Object.values(wealthProducts).flatMap(({ nameKey }) => [
+    translations.en[nameKey],
+    translations.de[nameKey],
+  ]);
+  if (resetBase || nameInput.value === "Rental property" || defaultNames.includes(nameInput.value)) {
+    nameInput.value = t(product.nameKey);
+  }
+  document.getElementById("assetRate").value = "4";
+  if (resetBase) {
+    document.getElementById("assetValue").value = "10000";
+    document.getElementById("assetContribution").value = "0";
+    document.getElementById("assetYear").value = String(new Date().getFullYear());
+  }
+  if (product.retirement) setRetirementHorizon();
+  updateWealthProductUI();
+}
+
 function applyLanguage() {
   document.documentElement.lang = currentLanguage;
   document.getElementById("languageSwitch").value = currentLanguage;
@@ -330,6 +505,10 @@ function applyLanguage() {
     element.placeholder = t(element.dataset.i18nPlaceholder);
   });
   document.getElementById("languageSwitch").setAttribute("aria-label", t("language"));
+  document.getElementById("domainSwitch").setAttribute("aria-label", t("domain"));
+  document.getElementById("wealthProduct").setAttribute("aria-label", t("wealthProduct"));
+  updateAgeDisplay();
+  updateWealthProductUI();
   updateCashFlowBreakdownLabel();
   updateAssetContributionLabel();
   renderAssets();
@@ -386,7 +565,11 @@ function getEventLabel(type) {
   return keys[type] ? t(keys[type]) : type;
 }
 
-function getAssetTypeLabel(type) {
+function getAssetTypeLabel(type, subtype) {
+  if (type === "wealth") {
+    const product = wealthProducts[subtype] || wealthProducts.general;
+    return `${t("typeWealth")} · ${t(product.nameKey)}`;
+  }
   const keys = {
     house: "typeHouse",
     stock: "typeStock",
@@ -675,6 +858,7 @@ function renderAssetProjection() {
 
 function updateSummary() {
   const data = readForm();
+  updateAgeDisplay();
   const cashFlow = calculateCashFlow(data);
   const taxEstimate = calculateTaxEstimate(data);
   const portfolioValue = calculatePortfolio(data);
@@ -688,9 +872,12 @@ function updateSummary() {
 
 function toYaml(data) {
   const lines = [
-    'name: "' + String(data.name).replace(/"/g, '\\"') + '"',
-    'city: "' + String(data.city).replace(/"/g, '\\"') + '"',
+    "name: " + JSON.stringify(data.name),
+    "city: " + JSON.stringify(data.city),
+    'birthDate: "' + String(data.birthDate || "") + '"',
     "taxClass: " + data.taxClass,
+    "childAllowance: " + Number(data.childAllowance),
+    "church: " + data.church,
     "householdType: " + data.householdType,
     "salary: " + Number(data.salary),
     "sideIncome: " + Number(data.sideIncome),
@@ -705,30 +892,29 @@ function toYaml(data) {
     "years: " + Number(data.years),
     "inflationRate: " + Number(data.inflationRate),
     "pensionContribution: " + Number(data.pensionContribution),
-    "assets:",
+    data.assets.length ? "assets:" : "assets: []",
   ];
 
   if (Array.isArray(data.assets)) {
     data.assets.forEach((asset) => {
       lines.push("  - type: " + asset.type);
-      lines.push('    name: "' + String(asset.name).replace(/"/g, '\\"') + '"');
+      if (asset.subtype) lines.push("    subtype: " + asset.subtype);
+      lines.push("    name: " + JSON.stringify(asset.name));
       lines.push("    value: " + Number(asset.value));
       lines.push("    interestRate: " + Number(asset.interestRate));
       lines.push("    monthlyContribution: " + Number(asset.monthlyContribution));
       lines.push("    acquisitionYear: " + Number(asset.acquisitionYear));
-      lines.push("    events:");
+      for (const key of ["taxNotes", "allowanceNotes", "subsidyNotes"]) {
+        lines.push("    " + key + ": " + JSON.stringify(asset[key] || ""));
+      }
+      lines.push(asset.events?.length ? "    events:" : "    events: []");
       if (Array.isArray(asset.events) && asset.events.length > 0) {
         asset.events.forEach((event) => {
           lines.push("      - type: " + event.type);
           lines.push("        year: " + Number(event.year));
           lines.push("        amount: " + Number(event.amount));
-          lines.push('        description: "' + String(event.description || "").replace(/"/g, '\\"') + '"');
+          lines.push("        description: " + JSON.stringify(event.description || ""));
         });
-      } else {
-        lines.push("      - type: buy");
-        lines.push("        year: " + Number(asset.acquisitionYear || new Date().getFullYear()));
-        lines.push("        amount: " + Number(asset.value));
-        lines.push('        description: "Initial asset setup"');
       }
     });
   }
@@ -737,52 +923,76 @@ function toYaml(data) {
 }
 
 function parseYaml(text) {
-  const result = {};
-  const lines = text.split(/\r?\n/).filter((line) => line.trim() && !line.trim().startsWith("#"));
-
-  for (const line of lines) {
-    const match = line.match(/^([A-Za-z0-9_]+)\s*:\s*(.*)$/);
-    if (!match) continue;
-
-    const [, key, rawValue] = match;
-    let value = rawValue.trim();
-
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-      value = value.slice(1, -1);
-    } else if (/^-?\d+(\.\d+)?$/.test(value)) {
-      value = Number(value);
-    }
-
-    result[key] = value;
+  const parsed = jsyaml.load(text, { schema: jsyaml.JSON_SCHEMA });
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("Expected a YAML mapping.");
   }
+  const validated = {};
+  for (const key of Object.keys(idMap)) {
+    if (!Object.hasOwn(parsed, key)) continue;
+    const value = parsed[key];
+    const input = document.getElementById(idMap[key]);
+    if (numericFields.includes(key)) {
+      if (typeof value !== "number" || !Number.isFinite(value)) throw new Error(`Invalid ${key}.`);
+    } else if (!["string", "number"].includes(typeof value)) {
+      throw new Error(`Invalid ${key}.`);
+    }
+    const candidate = input.cloneNode(true);
+    candidate.value = String(value);
+    if (candidate.value !== String(value) || !candidate.checkValidity()) throw new Error(`Invalid ${key}.`);
+    validated[key] = value;
+  }
+  if (Object.hasOwn(parsed, "assets")) {
+    if (!Array.isArray(parsed.assets)) throw new Error("Expected an assets list.");
+    const types = [...document.getElementById("assetType").options].map((option) => option.value);
+    validated.assets = parsed.assets.map((asset, assetIndex) => {
+      if (!asset || !types.includes(asset.type) || typeof asset.name !== "string") throw new Error("Invalid asset.");
+      for (const key of ["value", "interestRate", "monthlyContribution", "acquisitionYear"]) {
+        if (typeof asset[key] !== "number" || !Number.isFinite(asset[key])) throw new Error(`Invalid asset ${key}.`);
+      }
+      if (asset.subtype !== undefined && !Object.hasOwn(wealthProducts, asset.subtype)) throw new Error("Invalid wealth product.");
+      for (const key of ["taxNotes", "allowanceNotes", "subsidyNotes"]) {
+        if (asset[key] !== undefined && typeof asset[key] !== "string") throw new Error(`Invalid ${key}.`);
+      }
+      if (asset.events !== undefined && !Array.isArray(asset.events)) throw new Error("Invalid events.");
+      const events = (asset.events || []).map((event, eventIndex) => {
+        if (!event || !["buy", "sell", "contribution", "rate-change", "maintenance", "income", "expense"].includes(event.type) ||
+          !Number.isInteger(event.year) || !Number.isFinite(event.amount) ||
+          (event.description !== undefined && typeof event.description !== "string")) throw new Error("Invalid asset event.");
+        return { id: `event-import-${assetIndex}-${eventIndex}`, type: event.type, year: event.year, amount: event.amount, description: event.description || "" };
+      });
+      return {
+        id: `asset-import-${assetIndex}`, type: asset.type, name: asset.name, value: asset.value,
+        interestRate: asset.interestRate, monthlyContribution: asset.monthlyContribution,
+        acquisitionYear: asset.acquisitionYear, ...(asset.subtype ? { subtype: asset.subtype } : {}),
+        taxNotes: asset.taxNotes || "", allowanceNotes: asset.allowanceNotes || "", subsidyNotes: asset.subsidyNotes || "", events,
+      };
+    });
+  }
+  if (!Object.keys(validated).length) throw new Error("No recognized finance data.");
+  return validated;
+}
 
-  return result;
+function loadYamlText(text) {
+  const parsed = parseYaml(text);
+  for (const [key, value] of Object.entries(parsed)) {
+    if (key === "assets") continue;
+    document.getElementById(idMap[key]).value = value;
+  }
+  if (parsed.assets) state.assets = parsed.assets;
+  updateSummary();
+  document.getElementById("yamlOutput").value = toYaml(state);
+  document.getElementById("fileStatus").textContent = t("yamlLoaded");
 }
 
 function applyYamlData() {
-  const text = document.getElementById("yamlOutput").value.trim();
-  if (!text) return;
-
-  const parsed = parseYaml(text);
-  const entries = Object.entries(parsed);
-  if (!entries.length) {
-    return;
+  try {
+    loadYamlText(document.getElementById("yamlOutput").value);
+    document.getElementById("yamlError").textContent = "";
+    document.getElementById("yamlDialog").close();
+  } catch (error) {
+    document.getElementById("yamlError").textContent = t("yamlFailure") + error.message;
   }
-
-  for (const [key, value] of entries) {
-    if (key === "assets") continue;
-
-    const inputId = idMap[key];
-    if (!inputId) continue;
-    const element = document.getElementById(inputId);
-    if (!element) continue;
-
-    element.value = value;
-  }
-
-  state.assets = state.assets || [];
-  renderAssets();
-  updateSummary();
 }
 
 function renderAssets() {
@@ -820,7 +1030,7 @@ function renderAssets() {
             <div class="asset-summary-heading">
               <span class="disclosure-indicator" aria-hidden="true">▶</span>
               <div>
-                <p class="asset-type">${escapeHtml(getAssetTypeLabel(asset.type))}</p>
+                <p class="asset-type">${escapeHtml(getAssetTypeLabel(asset.type, asset.subtype))}</p>
                 <h3>${escapeHtml(getAssetName(asset))}</h3>
               </div>
             </div>
@@ -851,6 +1061,20 @@ function renderAssets() {
               </div>
             </div>
 
+            ${asset.type === "wealth" ? `<p class="wealth-treatment"><strong>${t("wealthTaxTreatment")}:</strong> ${t("wealthNoTaxCalculation")} ${t((wealthProducts[asset.subtype] || wealthProducts.general).treatmentKey)}</p>` : ""}
+            <p id="taxNotesHelp-${escapeHtml(asset.id)}">${t("assetTaxNotesHelp")}</p>
+            <div class="form-grid asset-tax-notes">
+              ${[
+                ["taxNotes", "assetTaxNotes"],
+                ["allowanceNotes", "assetAllowanceNotes"],
+                ["subsidyNotes", "assetSubsidyNotes"],
+              ].map(([key, label]) => `
+                <label>
+                  <span>${t(label)}</span>
+                  <input type="text" data-note-field="${key}" value="${escapeHtml(asset[key] || "")}" aria-describedby="taxNotesHelp-${escapeHtml(asset.id)}" />
+                </label>
+              `).join("")}
+            </div>
             ${renderAssetCashflow(asset, openCashflows.has(asset.id))}
 
             <div class="asset-event-form">
@@ -922,6 +1146,7 @@ function addAsset(event) {
   event.preventDefault();
 
   const type = document.getElementById("assetType").value;
+  const subtype = type === "wealth" ? document.getElementById("wealthProduct").value : undefined;
   const name = document.getElementById("assetName").value.trim() || t("newAsset");
   const value = Number.parseFloat(document.getElementById("assetValue").value) || 0;
   const interestRate = Number.parseFloat(document.getElementById("assetRate").value) || 0;
@@ -931,24 +1156,30 @@ function addAsset(event) {
   state.assets.push({
     id: `asset-${Date.now()}`,
     type,
+    ...(subtype ? { subtype } : {}),
     name,
     value,
     interestRate,
     monthlyContribution,
     acquisitionYear,
+    taxNotes: document.getElementById("assetTaxNotes").value,
+    allowanceNotes: document.getElementById("assetAllowanceNotes").value,
+    subsidyNotes: document.getElementById("assetSubsidyNotes").value,
     events: [
       {
         id: `event-${Date.now()}`,
         type: "buy",
         year: acquisitionYear,
         amount: value,
-        description: t("initialPurchase").replace("{type}", getAssetTypeLabel(type)),
+        description: t("initialPurchase").replace("{type}", getAssetTypeLabel(type, subtype)),
       },
     ],
   });
 
   document.getElementById("assetForm").reset();
   document.getElementById("assetType").value = type;
+  document.getElementById("wealthProduct").value = subtype || "general";
+  updateWealthProductUI();
   document.getElementById("assetName").value = "";
   document.getElementById("assetValue").value = "10000";
   document.getElementById("assetRate").value = "4";
@@ -1008,7 +1239,30 @@ function bindEvents() {
   });
 
   document.getElementById("assetForm").addEventListener("submit", addAsset);
-  document.getElementById("assetType").addEventListener("change", updateAssetContributionLabel);
+  document.getElementById("assetsList").addEventListener("input", (event) => {
+    const field = event.target.dataset.noteField;
+    if (!["taxNotes", "allowanceNotes", "subsidyNotes"].includes(field)) return;
+    const assetId = event.target.closest("[data-asset-id]").dataset.assetId;
+    const asset = state.assets.find((item) => item.id === assetId);
+    if (asset) asset[field] = event.target.value;
+  });
+  document.getElementById("assetType").addEventListener("change", () => {
+    updateAssetContributionLabel();
+    if (document.getElementById("assetType").value === "wealth") {
+      applyWealthProductPreset(true);
+    } else {
+      updateWealthProductUI();
+    }
+  });
+  document.getElementById("wealthProduct").addEventListener("change", () => applyWealthProductPreset());
+  document.getElementById("birthDate").addEventListener("change", () => {
+    const subtype = document.getElementById("wealthProduct").value;
+    if (document.getElementById("assetType").value === "wealth" && wealthProducts[subtype]?.retirement) {
+      setRetirementHorizon();
+      updateWealthProductUI();
+    }
+    updateSummary();
+  });
 
   document.getElementById("assetsList").addEventListener("click", (event) => {
     const actionTarget = event.target.closest("[data-action]");
@@ -1027,39 +1281,48 @@ function bindEvents() {
     }
   });
 
-  document.getElementById("load-demo").addEventListener("click", () => {
-    const demoValues = {
-      name: "Max Mustermann",
-      city: "Berlin",
-      taxClass: "2",
-      householdType: "single",
-      salary: 72000,
-      sideIncome: 250,
-      rent: 1200,
-      food: 500,
-      insurance: 350,
-      transport: 220,
-      leisure: 300,
-      investment: 600,
-      currentSavings: 25000,
-      annualReturn: 6,
-      years: 20,
-      pensionContribution: 200,
-    };
-
-    Object.entries(demoValues).forEach(([key, value]) => {
-      const element = document.getElementById(idMap[key]);
-      if (element) element.value = value;
-    });
-
-    state.assets = defaultAssets.map((asset) => ({ ...asset, events: [...asset.events] }));
-    renderAssets();
-    updateSummary();
+  document.getElementById("loadYaml").addEventListener("click", () => {
+    document.getElementById("yamlFile").click();
   });
-
-  document.getElementById("exportYaml").addEventListener("click", () => {
-    const yamlText = toYaml(readForm());
-    document.getElementById("yamlOutput").value = yamlText;
+  document.getElementById("yamlFile").addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    try {
+      loadYamlText(await file.text());
+    } catch (error) {
+      document.getElementById("fileStatus").textContent = t("yamlFailure") + error.message;
+    } finally {
+      event.target.value = "";
+    }
+  });
+  document.getElementById("saveYaml").addEventListener("click", () => {
+    const blob = new Blob([toYaml(readForm())], { type: "application/yaml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "fincalc.yaml";
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    document.getElementById("fileStatus").textContent = t("yamlSaved");
+  });
+  document.getElementById("shareYaml").addEventListener("click", async () => {
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error(t("clipboardUnavailable"));
+      await navigator.clipboard.writeText(toYaml(readForm()));
+      document.getElementById("fileStatus").textContent = t("yamlCopied");
+    } catch (error) {
+      document.getElementById("fileStatus").textContent = t("yamlFailure") + error.message;
+    }
+  });
+  document.getElementById("showYaml").addEventListener("click", () => {
+    document.getElementById("yamlOutput").value = toYaml(readForm());
+    document.getElementById("yamlError").textContent = "";
+    document.getElementById("yamlDialog").showModal();
+  });
+  document.getElementById("closeYaml").addEventListener("click", () => {
+    document.getElementById("yamlDialog").close();
   });
 
   document.getElementById("importYaml").addEventListener("click", applyYamlData);

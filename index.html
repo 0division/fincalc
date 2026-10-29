@@ -15,19 +15,31 @@
         </div>
         <div class="topbar-actions">
           <label class="language-control">
+            <span data-i18n="domain">Domain</span>
+            <select id="domainSwitch" aria-label="Domain">
+              <option value="de">.de</option>
+            </select>
+          </label>
+          <label class="language-control">
             <span data-i18n="language">Language</span>
             <select id="languageSwitch" aria-label="Language">
               <option value="en">English</option>
               <option value="de">Deutsch</option>
             </select>
           </label>
-          <button id="load-demo" class="secondary-button" data-i18n="loadDemo">Load demo data</button>
+          <button id="loadYaml" class="secondary-button" data-i18n="load">Load</button>
+          <button id="saveYaml" class="secondary-button" data-i18n="save">Save</button>
+          <button id="shareYaml" class="secondary-button" data-i18n="shareYaml">Share YAML</button>
+          <button id="showYaml" class="secondary-button" data-i18n="showYaml">Show</button>
+          <input id="yamlFile" type="file" accept=".yaml,.yml,text/yaml,application/yaml" hidden />
         </div>
       </header>
+      <p id="fileStatus" role="status" aria-live="polite"></p>
 
       <main class="layout">
-        <section class="panel">
-          <h2 data-i18n="personalData">Personal data</h2>
+        <section class="panel full-width-panel">
+          <details id="personalDataDetails" class="form-details">
+            <summary><h2 data-i18n="personalData">Personal data</h2></summary>
           <div class="form-grid">
             <label>
               <span data-i18n="name">Name</span>
@@ -38,11 +50,29 @@
               <input id="city" type="text" value="Berlin" />
             </label>
             <label>
+              <span data-i18n="birthDate">Date of birth</span>
+              <input id="birthDate" type="date" value="1990-01-15" />
+              <small id="ageDisplay" aria-live="polite"></small>
+            </label>
+            <label>
               <span data-i18n="taxClass">Tax class</span>
               <select id="taxClass">
                 <option value="1">I</option>
                 <option value="2" selected>II</option>
                 <option value="3">III</option>
+              </select>
+            </label>
+            <label>
+              <span data-i18n="childAllowance">Child allowance factor</span>
+              <input id="childAllowance" type="number" min="0" step="0.5" value="0" aria-describedby="taxProfileNote" />
+            </label>
+            <label>
+              <span data-i18n="church">Church membership</span>
+              <select id="church" aria-describedby="taxProfileNote">
+                <option value="none" data-i18n="churchNone">None</option>
+                <option value="catholic" data-i18n="churchCatholic">Roman Catholic</option>
+                <option value="protestant" data-i18n="churchProtestant">Protestant</option>
+                <option value="other" data-i18n="churchOther">Other religious community</option>
               </select>
             </label>
             <label>
@@ -53,10 +83,13 @@
               </select>
             </label>
           </div>
+          <p id="taxProfileNote" data-i18n="taxProfileNote">Child allowance and church membership are saved only; they do not affect the tax estimate.</p>
+          </details>
         </section>
 
-        <section class="panel">
-          <h2 data-i18n="cashFlow">Cash flow</h2>
+        <section class="panel full-width-panel">
+          <details id="cashFlowDetails" class="form-details">
+            <summary><h2 data-i18n="cashFlow">Cash flow</h2></summary>
           <div class="form-grid">
             <label>
               <span data-i18n="grossSalary">Gross salary (year)</span>
@@ -91,6 +124,7 @@
               <input id="investment" type="number" value="600" />
             </label>
           </div>
+          </details>
         </section>
 
         <section class="panel">
@@ -121,12 +155,15 @@
 
         <section class="panel assets-panel">
           <h2 data-i18n="assets">Assets</h2>
+          <details id="addAssetDetails" class="form-details">
+            <summary><h3 data-i18n="addAsset">Add asset</h3></summary>
           <form id="assetForm" class="asset-form">
             <div class="form-grid">
               <label>
                 <span data-i18n="assetType">Asset type</span>
                 <select id="assetType" name="assetType">
-                  <option value="house" data-i18n="typeHouse">House</option>
+                  <option value="wealth" data-i18n="typeWealth">Wealth</option>
+                  <option value="house" data-i18n="typeHouse" selected>House</option>
                   <option value="etf">ETF</option>
                   <option value="stock" data-i18n="typeStock">Stock</option>
                   <option value="pension" data-i18n="typePension">Pension</option>
@@ -134,6 +171,16 @@
                   <option value="cash" data-i18n="typeCash">Cash</option>
                   <option value="business" data-i18n="typeBusiness">Business</option>
                   <option value="income" data-i18n="typeIncome">Income</option>
+                </select>
+              </label>
+              <label id="wealthProductControl" hidden>
+                <span data-i18n="wealthProduct">Wealth product</span>
+                <select id="wealthProduct" name="wealthProduct">
+                  <option value="general" data-i18n="wealthGeneral">General wealth</option>
+                  <option value="av-depot" data-i18n="wealthAvDepot">AV-Depot</option>
+                  <option value="riester" data-i18n="wealthRiester">Riester</option>
+                  <option value="etf-portfolio" data-i18n="wealthEtfPortfolio">ETF-Portfolio</option>
+                  <option value="ruerup" data-i18n="wealthRuerup">Rürup</option>
                 </select>
               </label>
               <label>
@@ -157,10 +204,27 @@
                 <input id="assetYear" name="assetYear" type="number" value="2023" />
               </label>
             </div>
+            <p id="wealthProductNote" class="wealth-product-note" aria-live="polite" hidden></p>
+            <p id="assetTaxNotesHelp" data-i18n="assetTaxNotesHelp">Information only, not calculated. Shared allowances must not be counted separately for each asset.</p>
+            <div class="form-grid">
+              <label>
+                <span data-i18n="assetTaxNotes">Tax treatment</span>
+                <input id="assetTaxNotes" type="text" aria-describedby="assetTaxNotesHelp" />
+              </label>
+              <label>
+                <span data-i18n="assetAllowanceNotes">Allowance notes</span>
+                <input id="assetAllowanceNotes" type="text" aria-describedby="assetTaxNotesHelp" />
+              </label>
+              <label>
+                <span data-i18n="assetSubsidyNotes">Subsidy notes</span>
+                <input id="assetSubsidyNotes" type="text" aria-describedby="assetTaxNotesHelp" />
+              </label>
+            </div>
             <div class="button-row">
               <button type="submit" data-i18n="addAsset">Add asset</button>
             </div>
           </form>
+          </details>
 
           <div class="asset-toolbar">
             <label class="view-control">
@@ -172,8 +236,10 @@
             </label>
           </div>
           <div id="assetsList" class="asset-list"></div>
-          <details class="projection-details">
-            <summary data-i18n="projectionTitle">Asset &amp; cash flow projection</summary>
+        </section>
+
+        <section id="projectionPanel" class="panel full-width-panel" aria-labelledby="projectionHeading">
+            <h2 id="projectionHeading" data-i18n="projectionTitle">Asset &amp; cash flow projection</h2>
             <p class="projection-note" data-i18n="projectionNote">Compare annual income, costs, investments, and each asset side by side. Future cash flows are assumed to grow with inflation; “Today's €” shows purchasing power in today's euros.</p>
             <label class="interval-control">
               <span data-i18n="showValues">Show values</span>
@@ -195,7 +261,6 @@
               <p data-i18n="cashFlowDetailsHelp">Expand to include income, expenses, and investments in the projection table.</p>
             </details>
             <div id="assetProjection" class="projection-table-wrap"></div>
-          </details>
         </section>
 
         <section class="panel">
@@ -220,17 +285,19 @@
           </div>
         </section>
 
-        <section class="panel">
-          <h2 data-i18n="yamlExport">YAML export</h2>
-          <textarea id="yamlOutput" rows="18" spellcheck="false"></textarea>
-          <div class="button-row">
-            <button id="exportYaml" data-i18n="exportYaml">Export YAML</button>
-            <button id="importYaml" class="secondary-button" data-i18n="importYaml">Import YAML</button>
-          </div>
-        </section>
       </main>
     </div>
 
+    <dialog id="yamlDialog" aria-labelledby="yamlDialogTitle">
+      <h2 id="yamlDialogTitle" data-i18n="yamlExport">YAML export</h2>
+      <textarea id="yamlOutput" rows="18" spellcheck="false" aria-labelledby="yamlDialogTitle"></textarea>
+      <div class="button-row">
+        <button id="importYaml" data-i18n="importYaml">Import YAML</button>
+        <button id="closeYaml" class="secondary-button" data-i18n="close">Close</button>
+      </div>
+      <p id="yamlError" role="alert"></p>
+    </dialog>
+    <script src="vendor/js-yaml.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
